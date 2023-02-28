@@ -1,0 +1,3 @@
+/home/dumonten/Documents/GitHub/TI-4-term/lab-1/Clion c++/cmake-build-debug/CMakeFiles/Clion_c__.dir
+/home/dumonten/Documents/GitHub/TI-4-term/lab-1/Clion c++/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/dumonten/Documents/GitHub/TI-4-term/lab-1/Clion c++/cmake-build-debug/CMakeFiles/rebuild_cache.dir

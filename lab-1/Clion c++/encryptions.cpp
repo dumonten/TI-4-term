@@ -13,7 +13,7 @@ void alphabets::Alphabet::setChars()
     switch(alphabet)
     {
         case russian:
-            for (int i = 0; i < charVectorRussian.size(); i++)
+            for (uint64_t i = 0; i < charVectorRussian.size(); i++)
             {
                 charSet.insert(charVectorRussian[i]);
                 charMap[charVectorRussian[i]] = i % 33;
@@ -65,25 +65,29 @@ Encryption::Encryption(const std::wstring& k, const std::wstring& basicString,
 
 void Encryption::reformatData()
 {
-    dataIsReformat = true;
     reformatString(key);
     reformatString(plaintext);
+    dataIsReformat = true;
 }
 
 void Encryption::reformatString(std::wstring& str)
 {
     std::wstring tempString;
-    for (wchar_t i : str)
+    std::set<wchar_t> charMap = alphabet.getCharSet();
+    if (alphabet.getAlphabet() == alphabets::possibleAlphabet::russian)
     {
-        if (alphabet.getAlphabet() == alphabets::possibleAlphabet::russian)
+        for (wchar_t i : str)
         {
-            if (alphabet.getCharSet().contains(i))
+            if (charMap.find(i) != charMap.end())
                 tempString += i;
         }
-        else if (alphabet.getAlphabet() == alphabets::possibleAlphabet::english)
+    }
+    else if (alphabet.getAlphabet() == alphabets::possibleAlphabet::english)
+    {
+        for (wchar_t i : str)
         {
-            if (alphabet.getCharSet().contains(tolower(i)))
-                tempString += i;
+            if (charMap.find(towlower(i)) != charMap.end())
+                tempString += towlower(i);
         }
     }
     str = tempString;
@@ -99,7 +103,7 @@ ColumnMethod::ColumnMethod(const std::wstring& k, const std::wstring& basicStrin
 {}
 
 long long ColumnMethod::partition(std::vector<std::pair<wchar_t, uint32_t> >& v,
-                    const alphabets::Alphabet& alphabet, long long start, long long end)
+                                  const alphabets::Alphabet& alphabet, long long start, long long end)
 {
     std::pair<wchar_t, uint32_t> pivot  = v[end];
     long long pIndex = start;
@@ -117,7 +121,7 @@ long long ColumnMethod::partition(std::vector<std::pair<wchar_t, uint32_t> >& v,
 }
 
 void ColumnMethod::quicksort(std::vector<std::pair<wchar_t, uint32_t> >& v,
-               const alphabets::Alphabet& alphabet, long long start, long long end)
+                             const alphabets::Alphabet& alphabet, long long start, long long end)
 {
     if (start >= end)
         return;
@@ -138,10 +142,7 @@ void ColumnMethod::initEncryptionMatrix()
     if (!dataIsReformat)
         reformatData();
     if (key.empty() || plaintext.empty())
-    {
-        std::wcout << "Error: Key or/and plaintext is/are empty. Check your data." << "\n";
-        exit(1);
-    }
+        throw Error("Ошибка: Ключ или/и исходный текст отсутствуют. Проверьте свои данные и выбранный язык.");
 
     uint32_t columns = key.size(), rows;
     rows = plaintext.size() % columns != 0 ? plaintext.size() / columns + 1 : plaintext.size() / columns;
@@ -149,8 +150,9 @@ void ColumnMethod::initEncryptionMatrix()
 
     if (keySeq.empty()) initKeySeq();
 
+    uint32_t plaintextSize = plaintext.size();
     for (uint32_t i = 0, ptrStr = 0; i < rows; i++)
-        for (uint32_t j = 0; i*columns + j <= plaintext.size() && j < columns; j++)
+        for (uint32_t j = 0; ptrStr < plaintextSize && j < columns; j++)
             encryptionMatrix[i][j] = plaintext[ptrStr++];
 }
 
@@ -159,10 +161,7 @@ void ColumnMethod::initDecryptionMatrix(const std::wstring& cipherText)
     if (!dataIsReformat)
         reformatData();
     if (key.empty() || cipherText.empty())
-    {
-        std::wcout << "Error: Key or/and cipherText is/are empty. Check your data." << "\n";
-        exit(1);
-    }
+        throw Error("Ошибка: Ключ или/и исходный текст отсутствуют. Проверьте свои данные и выбранный язык.");
 
     uint32_t columns = key.size(), rows;
     rows = cipherText.size() % columns != 0 ? cipherText.size() / columns + 1 : cipherText.size() / columns;
@@ -179,12 +178,8 @@ void ColumnMethod::initDecryptionMatrix(const std::wstring& cipherText)
     {
         uint32_t currColumn = keySeq[j].second;
         for (uint32_t i = 0; i < rows; i++) {
-            if (!emptyCellsInd.contains(i * columns + currColumn))
-            {
+            if (!(emptyCellsInd.find(i * columns + currColumn) != emptyCellsInd.end()))
                 decryptionMatrix[i][currColumn] = cipherText[k++];
-                wchar_t wc = cipherText[k-1];
-                int a = 10;
-            }
         }
     }
 }
@@ -239,11 +234,16 @@ std::wstring ColumnMethod::encrypt() {
     return ciphertext;
 }
 
-std::wstring ColumnMethod::decrypt(const std::wstring& cipherText)
+std::wstring ColumnMethod::decrypt(std::wstring cipherText)
 {
+    reformatString(cipherText);
+    if (cipherText.empty())
+        throw Error("Ошибка: зашифрованный текст на другом языке или отсутствует.");
+
     std::wstring ptext;
     if (decryptionMatrix.empty())
         initDecryptionMatrix(cipherText);
+
     for (auto & i : decryptionMatrix)
     {
         for (uint32_t j = 0, k = key.size(); j < k; j++)
@@ -265,7 +265,7 @@ Vigenere::Vigenere() : Encryption()
 {}
 
 Vigenere::Vigenere(const std::wstring& k, const std::wstring& basicString,
-                           alphabets::possibleAlphabet abc) : Encryption(k, basicString, abc)
+                   alphabets::possibleAlphabet abc) : Encryption(k, basicString, abc)
 {}
 
 void Vigenere::setKey(const std::wstring& k)
@@ -294,25 +294,19 @@ void Vigenere::initReversedMap()
 
 std::wstring Vigenere::getKey() {
     if (key.empty() || plaintext.empty())
-    {
-        std::wcout << "Error: Key or/and plaintext is/are empty. Check your data." << "\n";
-        exit(1);
-    }
+        throw Error("Ошибка: Ключ или/и исходный текст отсутствуют. Проверьте свои данные и выбранный язык.");
+
     std::wstring newKey;
+    if (lettersReversed.empty()) initReversedMap();
+
     if (key.size() >= plaintext.size())
         newKey = key.substr(0, plaintext.size());
     else
     {
         uint32_t keySize = key.size(), aSize = alphabet.getAlphabetSize();
-
-        transform(newKey.begin(), newKey.end(), newKey.begin(), ::tolower);
         std::map<wchar_t, uint32_t> lettersNormal = alphabet.getCharMap();
-
-        if (lettersReversed.empty()) initReversedMap();
-
         for (uint32_t i = 0; i < keySize; i++)
             newKey += lettersReversed.at(lettersNormal[key[i]]);
-
         for (uint32_t i = keySize, n = plaintext.size(); i < n; i++)
             newKey += lettersReversed.at((lettersNormal.at(newKey[i - keySize]) + 1) % aSize);
     }
@@ -334,10 +328,13 @@ std::wstring Vigenere::encrypt()
     return ciphertext;
 }
 
-std::wstring Vigenere::decrypt(const std::wstring& cipherText)
+std::wstring Vigenere::decrypt(std::wstring cipherText)
 {
     if (!dataIsReformat)
         reformatData();
+    reformatString(cipherText);
+    if (cipherText.empty())
+        throw Error("Ошибка: зашифрованный текст на другом языке или отсутствует");
 
     std::wstring ptext, newKey = getKey();
     std::map<wchar_t, uint32_t> lettersNormal = alphabet.getCharMap();

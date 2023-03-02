@@ -6,6 +6,18 @@
 #include <set>
 #include <vector>
 #include <map>
+#include <cstdlib>
+#include <cstring>
+
+
+class Error : public std::exception {
+private:
+    char* msg;
+public:
+    explicit Error(const char* m)
+    { strcpy(msg, m); }
+    [[nodiscard]] const char* error()const noexcept { return msg; }
+};
 
 namespace encryption
 {
@@ -47,7 +59,7 @@ namespace encryption
         bool dataIsReformat;
         alphabets::Alphabet alphabet;
         std::wstring key, plaintext;
-    private:
+    protected:
         virtual void reformatString(std::wstring& str);
     public:
         Encryption();
@@ -58,7 +70,7 @@ namespace encryption
         virtual void setAlphabet(alphabets::possibleAlphabet abc)  { alphabet = abc; alphabet.setChars(); }
 
         virtual std::wstring encrypt()=0;
-        virtual std::wstring decrypt(const std::wstring& cipherText)=0;
+        virtual std::wstring decrypt(std::wstring cipherText)=0;
 
         virtual void reformatData();
 
@@ -88,9 +100,10 @@ namespace encryption
         void setAlphabet(alphabets::possibleAlphabet abc)  override;
 
         std::wstring encrypt() override;
-        std::wstring decrypt(const std::wstring& cipherText) override;
+        std::wstring decrypt(std::wstring cipherText) override;
 
         void clearData();
+
         ~ColumnMethod() override;
     };
 
@@ -110,7 +123,7 @@ namespace encryption
         void setAlphabet(alphabets::possibleAlphabet abc)  override;
 
         std::wstring encrypt() override;
-        std::wstring decrypt(const std::wstring& cipherText) override;
+        std::wstring decrypt(std::wstring cipherText) override;
 
         void clearData();
         ~Vigenere() override;

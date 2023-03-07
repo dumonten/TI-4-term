@@ -6,9 +6,6 @@
 #include <set>
 #include <vector>
 #include <map>
-#include <cstdlib>
-#include <cstring>
-
 
 class Error : public std::exception {
 private:
@@ -18,6 +15,8 @@ public:
     { msg = m; }
     [[nodiscard]] const char* error()const noexcept { return msg; }
 };
+
+
 namespace encryption
 {
     namespace alphabets
@@ -25,10 +24,8 @@ namespace encryption
         enum possibleAlphabet {russian, english, none};
         const std::vector<wchar_t> charVectorRussian =
         {
-                L'а', L'б', L'в', L'г', L'д', L'е', L'ё', L'ж', L'з', L'и', L'й', L'к', L'л', L'м', L'н', L'о', L'п',
-                L'р', L'с', L'т', L'у', L'ф', L'х', L'ц', L'ч', L'ш', L'щ', L'ъ', L'ы', L'ь', L'э', L'ю', L'я',
-                L'А', L'Б', L'В', L'Г', L'Д', L'Е', L'Ё', L'Ж', L'З', L'И', L'Й', L'К', L'Л', L'М', L'Н', L'О', L'П',
-                L'Р', L'С', L'Т', L'У', L'Ф', L'Х', L'Ц', L'Ч', L'Ш', L'Щ', L'Ъ', L'Ы', L'Ь', L'Э', L'Ю', L'Я',
+            L'а', L'б', L'в', L'г', L'д', L'е', L'ё', L'ж', L'з', L'и', L'й', L'к', L'л', L'м', L'н', L'о', L'п',
+            L'р', L'с', L'т', L'у', L'ф', L'х', L'ц', L'ч', L'ш', L'щ', L'ъ', L'ы', L'ь', L'э', L'ю', L'я'
         };
         class Alphabet
         {
@@ -102,7 +99,6 @@ namespace encryption
         std::wstring decrypt(std::wstring cipherText) override;
 
         void clearData();
-
         ~ColumnMethod() override;
     };
 
@@ -124,7 +120,6 @@ namespace encryption
         std::wstring encrypt() override;
         std::wstring decrypt(std::wstring cipherText) override;
 
-        void clearData();
         ~Vigenere() override;
     };
 }

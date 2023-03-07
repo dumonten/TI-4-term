@@ -3,15 +3,9 @@
 
 int main() {
     setlocale(LC_ALL,"");
-    encryption::ColumnMethod objColumnMthod(L"", L"", encryption::alphabets::possibleAlphabet::russian);
-    try
-    {
-        objColumnMthod.decrypt(L"ауау");
-    }
-    catch (Error& e)
-    {
-        std::cout << "MyException caught" << std::endl;
-        std::cout << e.error() << std::endl;
-    }
+    encryption::Vigenere objColumnMthod(L"Привет, мир! О, это шифратор! ", L"Желтое яркое солнце! ", encryption::alphabets::possibleAlphabet::russian);
+    std::wstring cipher = objColumnMthod.encrypt();
+    std::wcout << objColumnMthod.decrypt(cipher)<< "\n";
+    std::wcout << std::string("redhatonmyheadisabreadonii").length() << "\n";
     return 0;
 }

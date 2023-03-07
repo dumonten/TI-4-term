@@ -159,4 +159,6 @@ CMakeFiles/Clion_c__.dir/main.cpp.o: \
  /usr/include/c++/12.2.1/bits/vector.tcc /usr/include/c++/12.2.1/map \
  /usr/include/c++/12.2.1/bits/stl_map.h /usr/include/c++/12.2.1/tuple \
  /usr/include/c++/12.2.1/bits/uses_allocator.h \
- /usr/include/c++/12.2.1/bits/stl_multimap.h
+ /usr/include/c++/12.2.1/bits/stl_multimap.h \
+ /usr/include/c++/12.2.1/cstring /usr/include/string.h \
+ /usr/include/strings.h
